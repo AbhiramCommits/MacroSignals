@@ -1,0 +1,7 @@
+check_name,severity,n_flagged,series
+missing_series,pass,0,
+stale_series,pass,0,
+gap_in_history,pass,0,
+constant_series,pass,0,
+zscore_outlier,pass,0,
+future_vintage,pass,0,

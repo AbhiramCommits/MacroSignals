@@ -1,0 +1,7 @@
+check_name,severity,n_flagged,series
+missing_series,fail,1,US_UNRATE
+stale_series,fail,1,US_PMI
+gap_in_history,fail,1,US_PMI
+constant_series,fail,1,US_PMI
+zscore_outlier,fail,1,US_PMI
+future_vintage,fail,1,US_PMI

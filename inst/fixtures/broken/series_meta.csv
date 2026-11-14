@@ -1,0 +1,8 @@
+series_id,name,asset_class,country,frequency,unit,source,publish_lag_days
+US_CPI,US CPI (all items),Macro,US,monthly,index_2015_100,synthetic-fixture,12
+US_PAYROLLS,US nonfarm payroll change,Macro,US,monthly,thousand_persons,synthetic-fixture,5
+US_PMI,US ISM manufacturing PMI,Macro,US,monthly,diffusion_index,synthetic-fixture,2
+EA_CPI,Euro area HICP (all items),Macro,EA,monthly,index_2015_100,synthetic-fixture,15
+EA_PMI,Euro area manufacturing PMI,Macro,EA,monthly,diffusion_index,synthetic-fixture,3
+JP_CPI,Japan CPI (all items),Macro,JP,monthly,index_2015_100,synthetic-fixture,18
+US_UNRATE,US unemployment rate (phantom metadata row),Macro,US,monthly,percent,broken-fixture,5
