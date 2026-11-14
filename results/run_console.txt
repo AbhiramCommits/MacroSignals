@@ -1,0 +1,44 @@
+MacroSignals research run
+  run id     : run_20261113_c9f439e3 
+  as of      : 2026-11-13 
+  params hash: c9f439e3fc44c9408b5d3062e28198d1 
+  seed       : 20261114 
+
+Validation summary
+      check_name severity n_flagged series
+  missing_series     pass         0       
+    stale_series     pass         0       
+  gap_in_history     pass         0       
+ constant_series     pass         0       
+  zscore_outlier     pass         0       
+  future_vintage     pass         0       
+
+Net-of-cost performance (cost = 5 bp)
+    signal_name ann_return ann_vol  sharpe   max_dd   dd_start     dd_end
+          carry  0.0473436 0.04350 1.08514 -0.14393 2025-02-06 2026-08-28
+       momentum  0.1187890 0.04005 2.82326 -0.09971 2026-03-03 2026-07-07
+ macro_surprise  0.0005864 0.04025 0.03468 -0.10468 2020-08-31 2022-01-19
+      composite  0.0945443 0.04068 2.24139 -0.11199 2026-01-07 2026-08-11
+   calmar hit_rate ann_turnover avg_holding_days
+ 0.328939   0.5237        2.696           237.03
+ 1.191404   0.5634        8.437            80.31
+ 0.005601   0.5019        6.992            92.18
+ 0.844254   0.5558        5.992           104.97
+
+Gross performance
+    signal_name ann_return ann_vol sharpe   max_dd ann_turnover
+          carry   0.048756 0.04350 1.1163 -0.14245        2.696
+       momentum   0.123520 0.03997 2.9342 -0.09805        8.437
+ macro_surprise   0.004091 0.04023 0.1216 -0.09945        6.992
+      composite   0.097828 0.04067 2.3159 -0.10961        5.992
+
+Cost sensitivity (net Sharpe)
+# A tibble: 4 × 7
+  signal_name    cost_0 cost_1 cost_2 cost_5 cost_10 cost_20
+  <chr>           <dbl>  <dbl>  <dbl>  <dbl>   <dbl>   <dbl>
+1 carry           1.12   1.11  1.10   1.09    1.05     0.991
+2 momentum        2.93   2.91  2.89   2.82    2.71     2.48 
+3 macro_surprise  0.122  0.104 0.0868 0.0347 -0.0521  -0.224
+4 composite       2.32   2.30  2.29   2.24    2.17     2.01 
+
+Wrote results to results 

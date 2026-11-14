@@ -1,0 +1,145 @@
+{
+  "run_id": "run_20261113_c9f439e3",
+  "as_of": "2026-11-13",
+  "params_hash": "c9f439e3fc44c9408b5d3062e28198d1",
+  "params_file": "config/params.yml",
+  "seed": 20261114,
+  "r_version": "R version 4.6.1 (2026-06-24)",
+  "platform": "aarch64-apple-darwin25.4.0",
+  "counts": {
+    "series": 6,
+    "instruments": 16,
+    "observations": 1675,
+    "prices": 33552,
+    "rebalances": 86,
+    "signal_rows": 5504,
+    "validation_rows": 0
+  },
+  "coverage": {
+    "start": "2018-11-01",
+    "end": "2026-11-13",
+    "asset_classes": [
+      "Equity",
+      "FX",
+      "Rates"
+    ]
+  },
+  "validation": {
+    "checks_run": 6,
+    "checks_fired": 0,
+    "fail_rows": 0,
+    "warn_rows": 0,
+    "info_rows": 0,
+    "ok": true
+  },
+  "cost_bp": 5,
+  "rebalance": "monthly",
+  "net": {
+    "carry": {
+      "ann_return": 0.0473435922854,
+      "ann_vol": 0.0435029278689,
+      "sharpe": 1.08514136418,
+      "max_dd": -0.143928230178,
+      "dd_start": "2025-02-06",
+      "dd_end": "2026-08-28",
+      "calmar": 0.328938890077,
+      "hit_rate": 0.523679912901,
+      "ann_turnover": 2.69623417943,
+      "avg_holding_days": 237.032258065
+    },
+    "momentum": {
+      "ann_return": 0.11878901764,
+      "ann_vol": 0.0400504921736,
+      "sharpe": 2.82326145596,
+      "max_dd": -0.0997050620088,
+      "dd_start": "2026-03-03",
+      "dd_end": "2026-07-07",
+      "calmar": 1.19140407965,
+      "hit_rate": 0.563418617311,
+      "ann_turnover": 8.43687519106,
+      "avg_holding_days": 80.306010929
+    },
+    "macro_surprise": {
+      "ann_return": 0.000586355645278,
+      "ann_vol": 0.0402476775137,
+      "sharpe": 0.0346797149556,
+      "max_dd": -0.104683174555,
+      "dd_start": "2020-08-31",
+      "dd_end": "2022-01-19",
+      "calmar": 0.00560124057919,
+      "hit_rate": 0.501905280348,
+      "ann_turnover": 6.99168834866,
+      "avg_holding_days": 92.1792114695
+    },
+    "composite": {
+      "ann_return": 0.0945442564011,
+      "ann_vol": 0.0406806143613,
+      "sharpe": 2.24138599095,
+      "max_dd": -0.11198551925,
+      "dd_start": "2026-01-07",
+      "dd_end": "2026-08-11",
+      "calmar": 0.844254302116,
+      "hit_rate": 0.555797495917,
+      "ann_turnover": 5.99239106538,
+      "avg_holding_days": 104.971428571
+    }
+  },
+  "gross": {
+    "carry": {
+      "ann_return": 0.0487564572444,
+      "ann_vol": 0.043497852465,
+      "sharpe": 1.11626070786,
+      "max_dd": -0.142445540539,
+      "dd_start": "2025-02-06",
+      "dd_end": "2026-08-28",
+      "calmar": 0.342281387398,
+      "hit_rate": 0.523679912901,
+      "ann_turnover": 2.69623417943,
+      "avg_holding_days": 237.032258065
+    },
+    "momentum": {
+      "ann_return": 0.123519853711,
+      "ann_vol": 0.039973442732,
+      "sharpe": 2.93423434223,
+      "max_dd": -0.098047738066,
+      "dd_start": "2026-03-03",
+      "dd_end": "2026-07-07",
+      "calmar": 1.25979299622,
+      "hit_rate": 0.565596080566,
+      "ann_turnover": 8.43687519106,
+      "avg_holding_days": 80.306010929
+    },
+    "macro_surprise": {
+      "ann_return": 0.00409105798392,
+      "ann_vol": 0.040230237921,
+      "sharpe": 0.121590684294,
+      "max_dd": -0.0994497280594,
+      "dd_start": "2020-08-31",
+      "dd_end": "2022-01-19",
+      "calmar": 0.0411369449042,
+      "hit_rate": 0.50353837779,
+      "ann_turnover": 6.99168834866,
+      "avg_holding_days": 92.1792114695
+    },
+    "composite": {
+      "ann_return": 0.0978281055206,
+      "ann_vol": 0.0406659198672,
+      "sharpe": 2.31587420063,
+      "max_dd": -0.109609906818,
+      "dd_start": "2026-01-07",
+      "dd_end": "2026-08-11",
+      "calmar": 0.892511528935,
+      "hit_rate": 0.559608056614,
+      "ann_turnover": 5.99239106538,
+      "avg_holding_days": 104.971428571
+    }
+  },
+  "files": [
+    "results/metrics.csv",
+    "results/equity_curve.csv",
+    "results/ranked_latest.csv",
+    "results/cost_sensitivity.csv",
+    "reports/out/research_report.html",
+    "excel/MacroSignals_Desk.xlsx"
+  ]
+}
