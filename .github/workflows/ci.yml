@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: |
+            any::testthat
+            any::lintr
+          needs: check
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - name: Install system libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev
+
+      - name: Run pipeline, tests and lints
+        run: make deps ingest validate research test lint
+
+      - name: Render report and build workbook
+        run: make report excel
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: macrosignals-results
+          path: results/
+
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: macrosignals-report
+          path: reports/out/
+
+      - name: Upload workbook
+        uses: actions/upload-artifact@v4
+        with:
+          name: macrosignals-workbook
+          path: excel/MacroSignals_Desk.xlsx
