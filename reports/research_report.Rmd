@@ -1,0 +1,314 @@
+---
+title: "MacroSignals — Vintage-Aware Macro Signal Research"
+subtitle: "Run-level research report"
+date: "`r format(as.Date(params$as_of), '%d %B %Y')`"
+output:
+  html_document:
+    theme: flatly
+    toc: true
+    toc_float: true
+    number_sections: true
+    self_contained: true
+    code_folding: hide
+params:
+  run_id: "run_20261113_demo"
+  params_path: "config/params.yml"
+  results_dir: "results"
+  db_path: "data/macrosignals.sqlite"
+  as_of: "2026-11-13"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE,
+                      fig.width = 9, fig.height = 4.8, dpi = 110)
+suppressPackageStartupMessages({
+  library(ggplot2)
+  library(dplyr)
+  library(tidyr)
+  library(knitr)
+})
+
+root <- normalizePath(".")
+if (!file.exists(file.path(root, "DESCRIPTION"))) {
+  stop("Report must be knitted from the MacroSignals project root.")
+}
+for (f in list.files(file.path(root, "R"), pattern = "\\.R$", full.names = TRUE)) {
+  source(f)
+}
+
+params_yaml <- load_params(params$params_path)
+hash <- params_hash(params$params_path)
+results_dir <- params$results_dir
+db_path <- params$db_path
+run_id <- params$run_id
+
+metrics <- readr::read_csv(file.path(results_dir, "metrics.csv"),
+                           show_col_types = FALSE)
+curves <- readr::read_csv(file.path(results_dir, "equity_curve.csv"),
+                          show_col_types = FALSE)
+sens <- readr::read_csv(file.path(results_dir, "cost_sensitivity.csv"),
+                        show_col_types = FALSE)
+ranked <- readr::read_csv(file.path(results_dir, "ranked_latest.csv"),
+                          show_col_types = FALSE)
+
+con <- db_connect(db_path)
+series_meta <- db_query(con, "SELECT * FROM series_meta ORDER BY series_id")
+instrument_meta <- db_query(con, "SELECT * FROM instrument_meta
+                                  ORDER BY asset_class, instrument_id")
+observations <- db_query(
+  con, "SELECT COUNT(*) AS n, MIN(obs_date) AS first_obs,
+               MAX(obs_date) AS last_obs, COUNT(DISTINCT series_id) AS series
+          FROM observations")
+price_stats <- db_query(
+  con, "SELECT COUNT(*) AS n, MIN(obs_date) AS first_px,
+               MAX(obs_date) AS last_px, COUNT(DISTINCT instrument_id) AS instruments
+          FROM prices")
+validation <- db_query(
+  con, "SELECT * FROM validation_log WHERE run_id = ? ORDER BY check_name, series_id",
+  list(run_id))
+signal_values <- db_query(
+  con, "SELECT * FROM signal_values WHERE run_id = ? ORDER BY as_of_date,
+               instrument_id", list(run_id))
+DBI::dbDisconnect(con)
+
+check_counts <- validation %>%
+  count(check_name, severity, name = "n") %>%
+  arrange(check_name)
+fails <- sum(validation$severity == "fail")
+status_label <- if (fails == 0) "PASS — publication allowed" else
+  paste0("FAIL — ", fails, " blocking checks")
+status_colour <- if (fails == 0) "#1a7f37" else "#b42318"
+
+net <- metrics %>% filter(basis == "net")
+gross <- metrics %>% filter(basis == "gross")
+fmt_pct <- function(x) sprintf("%.2f%%", 100 * x)
+fmt_num <- function(x, d = 2) formatC(x, format = "f", digits = d)
+```
+
+<div style="padding:10px 14px;margin:8px 0 18px 0;border-left:6px solid `r status_colour`;
+background:#f7f7f7;font-size:1.05em;">
+<strong>Data-quality gate:</strong>
+<span style="color:`r status_colour`;font-weight:700;">`r status_label`</span><br/>
+Run <code>`r run_id`</code> · as of `r params$as_of` · params hash
+<code>`r substr(hash, 1, 12)`</code>
+</div>
+
+# Universe and data coverage
+
+The committed research universe contains **`r nrow(instrument_meta)` instruments**
+across **`r length(unique(instrument_meta$asset_class))` asset classes** and
+**`r nrow(series_meta)` vintage-aware macro series**. The price panel covers
+`r price_stats$first_px` to `r price_stats$last_px` with
+`r format(price_stats$n, big.mark = ",")` instrument-days. The vintage store
+holds `r format(observations$n, big.mark = ",")` observation-vintage rows from
+`r observations$first_obs` to `r observations$last_obs`.
+
+```{r universe-table}
+instrument_meta %>%
+  count(asset_class, name = "instruments") %>%
+  kable(caption = "Instrument coverage by asset class")
+```
+
+```{r macro-table}
+series_meta %>%
+  select(series_id, name, country, frequency, unit, publish_lag_days) %>%
+  kable(caption = "Macro series and publication lags")
+```
+
+# Validation summary
+
+Each named check is run against the point-in-time view at the as-of date.
+Any `fail` blocks signal publication. This run recorded
+**`r nrow(validation)` validation rows**, **`r fails` FAIL rows**.
+
+```{r validation-summary}
+if (nrow(check_counts) == 0) {
+  data.frame(check_name = "all checks", severity = "pass", n = 0) %>%
+    kable(caption = "Validation checks (no findings)")
+} else {
+  check_counts %>% kable(caption = "Validation findings by check and severity")
+}
+```
+
+```{r validation-detail}
+if (nrow(validation) > 0) {
+  validation %>%
+    select(series_id, check_name, severity, message) %>%
+    kable(caption = "Validation log for this run")
+} else {
+  cat("No validation findings: all six checks passed cleanly.")
+}
+```
+
+# Signal distributions
+
+Cross-sectional z-scores for the four published signals at every rebalance
+date. Winsorisation is applied at the
+`r params_yaml$zscore$winsor_level` level before standardisation.
+
+```{r signal-dist, fig.height=5.2}
+signal_values %>%
+  filter(is.finite(zscore)) %>%
+  mutate(signal_name = factor(signal_name,
+    levels = c("carry", "momentum", "macro_surprise", "composite"))) %>%
+  ggplot(aes(x = zscore, fill = signal_name)) +
+  geom_density(alpha = 0.55, colour = NA) +
+  facet_wrap(~signal_name, scales = "free_y", ncol = 2) +
+  labs(x = "Cross-sectional z-score", y = "Density", fill = NULL,
+       title = "Signal distributions across rebalance dates") +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "none")
+```
+
+# Equity curves
+
+Net-of-cost cumulative PnL for each signal, with the configured one-way cost of
+`r params_yaml$cost_bp` bp on traded notional.
+
+```{r equity-curves}
+curves %>%
+  ggplot(aes(x = date, y = cum_net, colour = signal_name)) +
+  geom_line(linewidth = 0.8) +
+  labs(x = NULL, y = "Cumulative net growth of 1",
+       colour = NULL, title = "Net equity curves") +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "bottom")
+```
+
+# Drawdowns
+
+```{r drawdowns}
+curves %>%
+  ggplot(aes(x = date, y = drawdown_net, colour = signal_name)) +
+  geom_line(linewidth = 0.65) +
+  geom_hline(yintercept = 0, colour = "grey40", linewidth = 0.3) +
+  scale_y_continuous(labels = function(x) paste0(round(100 * x), "%")) +
+  labs(x = NULL, y = "Drawdown", colour = NULL,
+       title = "Net drawdowns from running peak") +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "bottom")
+```
+
+# Performance and risk
+
+Gross and net diagnostics. Max drawdown is reported with the peak-to-trough
+date range; turnover is annualised traded notional; holding period is the mean
+run length of a non-zero position in business days.
+
+```{r metrics-table}
+net %>%
+  transmute(
+    Signal = signal_name,
+    `Ann. return` = fmt_pct(ann_return),
+    `Ann. vol` = fmt_pct(ann_vol),
+    Sharpe = fmt_num(sharpe),
+    `Max DD` = fmt_pct(max_dd),
+    `DD period` = paste0(dd_start, " → ", dd_end),
+    Calmar = fmt_num(calmar),
+    `Hit rate` = fmt_pct(hit_rate),
+    `Ann. turnover` = fmt_num(ann_turnover),
+    `Holding days` = fmt_num(avg_holding_days, 1)
+  ) %>%
+  kable(caption = paste0("Net-of-cost metrics (", params_yaml$cost_bp, " bp)"))
+```
+
+```{r gross-table}
+gross %>%
+  transmute(
+    Signal = signal_name,
+    `Ann. return` = fmt_pct(ann_return),
+    `Ann. vol` = fmt_pct(ann_vol),
+    Sharpe = fmt_num(sharpe),
+    `Max DD` = fmt_pct(max_dd),
+    Calmar = fmt_num(calmar),
+    `Ann. turnover` = fmt_num(ann_turnover)
+  ) %>%
+  kable(caption = "Gross (zero-cost) metrics")
+```
+
+# Turnover and cost sensitivity
+
+The grid reruns each strategy at one-way costs of
+`r paste(params_yaml$cost_grid_bp, collapse = ", ")` bp. Net Sharpe is shown for
+the composite and each stand-alone signal.
+
+```{r cost-sensitivity}
+sens %>%
+  ggplot(aes(x = cost_bp, y = sharpe, colour = signal_name, group = signal_name)) +
+  geom_line(linewidth = 0.8) +
+  geom_point(size = 1.8) +
+  labs(x = "One-way cost (bp)", y = "Net Sharpe", colour = NULL,
+       title = "Net Sharpe versus transaction cost") +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "bottom")
+```
+
+```{r cost-table}
+sens %>%
+  select(signal_name, cost_bp, ann_return, sharpe, ann_turnover) %>%
+  mutate(across(c(ann_return), fmt_pct),
+         across(c(sharpe, ann_turnover), fmt_num)) %>%
+  tidyr::pivot_wider(names_from = cost_bp,
+                     values_from = c(ann_return, sharpe, ann_turnover),
+                     names_glue = "{.value}_{cost_bp}bp") %>%
+  kable(caption = "Cost-sensitivity grid (net)")
+```
+
+# Latest ranked cross-section
+
+Rank 1 is the most attractive composite signal at the final rebalance date.
+
+```{r ranked-table}
+ranked %>%
+  transmute(
+    Rank = rank, Instrument = instrument_id, Name = name, Class = asset_class,
+    Carry = fmt_num(carry_z), Momentum = fmt_num(momentum_z),
+    `Macro surprise` = fmt_num(macro_surprise_z),
+    Composite = fmt_num(composite_z)
+  ) %>%
+  kable(caption = paste("Ranked signals as of", unique(ranked$as_of_date)))
+```
+
+# Reproducibility
+
+Every number in this report was produced by `scripts/run_research.R` from the
+seeded deterministic fixtures. The parameter file is version controlled and its
+MD5 is recorded in the run summary.
+
+```{r reproducibility}
+cat("Run id           :", run_id, "\n")
+cat("As-of date       :", params$as_of, "\n")
+cat("Params file      :", params$params_path, "\n")
+cat("Params MD5       :", hash, "\n")
+cat("Fixture seed     :", params_yaml$seed, "\n")
+cat("R version        :", R.version.string, "\n")
+cat("Platform         :", R.version$platform, "\n")
+cat("Rebalance        :", params_yaml$rebalance, "\n")
+cat("Cost (bp)        :", params_yaml$cost_bp, "\n")
+cat("Validation checks:", nrow(check_counts), "distinct findings;",
+    fails, "FAIL rows\n")
+```
+
+```{r params-dump}
+flat <- function(x, prefix = "") {
+  if (is.list(x)) {
+    out <- unlist(lapply(names(x), function(nm) {
+      flat(x[[nm]], if (nzchar(prefix)) paste0(prefix, ".", nm) else nm)
+    }))
+    return(out)
+  }
+  if (length(x) > 1) {
+    return(stats::setNames(paste(x, collapse = ", "), prefix))
+  }
+  stats::setNames(as.character(x), prefix)
+}
+p <- flat(params_yaml)
+data.frame(parameter = names(p), value = unname(p)) %>%
+  kable(caption = "Version-controlled parameters")
+```
+
+```{r session-info}
+cat("```\n")
+print(utils::sessionInfo())
+cat("```\n")
+```
