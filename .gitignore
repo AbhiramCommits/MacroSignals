@@ -1,0 +1,23 @@
+# Databases
+*.sqlite
+data/*.sqlite
+
+# R session artefacts
+.Rhistory
+.RData
+.Rproj.user
+renv/library/
+
+# Excel lock files and temporary exports
+~$*.xls*
+*.xlsm~
+
+# Rendered HTML in results (the canonical report lives in reports/out)
+results/*.html
+
+# OS cruft
+.DS_Store
+
+# Keep the small, inspectable result artefacts under version control
+!results/*.csv
+!results/*.json

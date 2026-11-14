@@ -1,0 +1,17 @@
+instrument_id,name,asset_class,country,quote_ccy,return_sign,us_weight,ea_weight,jp_weight
+EURUSD,EA/US spot,FX,EA,US,1,-0.5,0.5,0
+GBPUSD,GB/US spot,FX,GB,US,1,-0.5,0,0
+AUDUSD,AU/US spot,FX,AU,US,1,-0.5,0,0
+NZDUSD,NZ/US spot,FX,NZ,US,1,-0.5,0,0
+USDJPY,US/JP spot,FX,US,JP,1,0.5,0,-0.5
+USDCAD,US/CA spot,FX,US,CA,1,0.5,0,0
+USDCHF,US/CH spot,FX,US,CH,1,0.5,0,0
+USDSEK,US/SE spot,FX,US,SE,1,0.5,0,0
+UST10Y,US 10y Treasury future proxy,Rates,US,US,1,-1,0,0
+BUND10Y,German 10y Bund future proxy,Rates,EA,EA,1,0,-1,0
+GILT10Y,UK 10y Gilt future proxy,Rates,GB,GB,1,0,0,0
+JGB10Y,Japan 10y JGB future proxy,Rates,JP,JP,1,0,0,-1
+ACGB10Y,Australia 10y bond future proxy,Rates,AU,AU,1,0,0,0
+SPX500,S&P 500 index future proxy,Equity,US,US,1,1,0,0
+NDX100,Nasdaq 100 index future proxy,Equity,US,US,1,1,0,0
+DAX40,DAX 40 index future proxy,Equity,EA,EA,1,0,1,0

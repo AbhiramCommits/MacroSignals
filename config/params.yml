@@ -1,0 +1,48 @@
+# MacroSignals research parameters.
+# This file is version controlled: its MD5 is printed in every report and
+# written to results/run_summary.json as the params hash.
+
+seed: 20261114
+as_of: "2026-11-13"
+start_date: "2018-11-01"
+
+# Rolling cross-sectional standardisation
+zscore:
+  window: 252          # trailing business days used for the rolling z-score
+  min_periods: 60
+  winsor_level: 0.05   # two-sided quantile cap per cross-section
+
+momentum:
+  lookbacks: [21, 63, 252]
+  weights: [0.3, 0.4, 0.3]
+
+carry:
+  smoothing: 5         # business days
+
+macro_surprise:
+  trailing_months: 12  # history used to standardise the latest release
+  min_history: 6
+
+composite_weights:
+  carry: 0.40
+  momentum: 0.35
+  macro_surprise: 0.25
+
+rebalance: monthly
+cost_bp: 5
+
+cost_grid_bp: [0, 1, 2, 5, 10, 20]
+
+validation:
+  staleness_business_days:
+    monthly: 45
+    daily: 5
+  gap_business_days:
+    monthly: 62
+    daily: 10
+  constant_lookback: 24
+  constant_tol: 1.0e-10
+  zscore_window: 60
+  zscore_outlier_k: 8
+  zscore_min_periods: 12
+  forbidden_future_vintages: true

@@ -1,0 +1,37 @@
+Package: MacroSignals
+Type: Package
+Title: Vintage-Aware Macro Signal Research Toolkit
+Version: 0.1.0
+Authors@R:
+    person("MacroSignals", "Research", role = c("aut", "cre"),
+           email = "research@macrosignals.local")
+Description: A point-in-time macro research pipeline. It ingests vintage-aware
+    macro releases, FX spot and carry, government bond futures and equity index
+    proxies into a SQLite store, validates the data with a publication gate,
+    builds cross-sectional carry, momentum and macro-surprise signals, and
+    backtests them with transaction costs. Results feed a parameterised R
+    Markdown report and an Excel/VBA desk front end.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Depends:
+    R (>= 4.1)
+Imports:
+    DBI,
+    RSQLite,
+    dplyr,
+    tidyr,
+    readr,
+    purrr,
+    ggplot2,
+    lubridate,
+    zoo,
+    knitr,
+    rmarkdown,
+    openxlsx,
+    yaml,
+    httr
+Suggests:
+    testthat (>= 3.0.0),
+    lintr
+Config/testthat/edition: 3

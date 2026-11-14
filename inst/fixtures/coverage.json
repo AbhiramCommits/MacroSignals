@@ -1,0 +1,15 @@
+{
+  "seed": 20261114,
+  "start": "2018-11-01",
+  "end": "2026-11-13",
+  "business_days": 2097,
+  "instruments": 16,
+  "macro_series": 6,
+  "observation_rows": 1675,
+  "price_rows": 33552,
+  "asset_classes": [
+    "Equity",
+    "FX",
+    "Rates"
+  ]
+}
