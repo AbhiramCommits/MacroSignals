@@ -6,7 +6,3 @@ linters: linters_with_defaults(
     indentation_linter = NULL,
     quotes_linter = NULL
   )
-exclusions: list(
-    "renv",
-    "tests/testthat/_snaps"
-  )
