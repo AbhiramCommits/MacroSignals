@@ -23,6 +23,7 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: |
+            any::tidyverse
             any::testthat
             any::lintr
           needs: check
@@ -32,7 +33,11 @@ jobs:
       - name: Install system libraries
         run: |
           sudo apt-get update
-          sudo apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev
+          # systemfonts/textshaping/ragg (tidyverse dependencies) need the
+          # fontconfig, freetype, harfbuzz and fribidi headers when built from source.
+          sudo apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev \
+            libfontconfig1-dev libfreetype-dev libharfbuzz-dev libfribidi-dev \
+            libpng-dev libtiff-dev libjpeg-dev
 
       - name: Run pipeline, tests and lints
         run: make deps ingest validate research test lint
